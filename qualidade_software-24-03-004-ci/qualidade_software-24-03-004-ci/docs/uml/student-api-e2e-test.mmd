@@ -1,0 +1,54 @@
+sequenceDiagram
+    participant T as Teste E2E (MockMvc)
+    participant API as StudentApiController
+    participant S as StudentService
+    participant R as StudentRepository (mock)
+
+    alt shouldReturnStudentsList
+        T->>API: GET /api/students
+        API->>S: getAllStudents()
+        S->>R: findAll()
+        R-->>S: lista de estudantes
+        S-->>API: lista de estudantes
+        API-->>T: 200 OK
+    else shouldCreateStudent
+        T->>API: POST /api/students
+        API->>S: existsByEmail(email)
+        S->>R: existsByEmail(email)
+        R-->>S: false
+        API->>S: existsByRegistrationNumber(registrationNumber)
+        S->>R: existsByRegistrationNumber(registrationNumber)
+        R-->>S: false
+        API->>S: saveStudent(student)
+        S->>R: save(student)
+        R-->>S: student salvo
+        S-->>API: student salvo
+        API-->>T: 201 Created
+    else shouldReturnConflictWhenEmailAlreadyExists
+        T->>API: POST /api/students (email duplicado)
+        API->>S: existsByEmail(email)
+        S->>R: existsByEmail(email)
+        R-->>S: true
+        API-->>T: 409 Conflict
+    else shouldReturnNotFoundWhenUpdatingMissingStudent
+        T->>API: PUT /api/students/missing
+        API->>S: getStudentById("missing")
+        S->>R: findById("missing")
+        R-->>S: Optional.empty
+        API-->>T: 404 Not Found
+    else shouldDeleteStudent
+        T->>API: DELETE /api/students/s1
+        API->>S: getStudentById("s1")
+        S->>R: findById("s1")
+        R-->>S: Optional<Student>
+        API->>S: deleteStudent("s1")
+        S->>R: deleteById("s1")
+        API-->>T: 204 No Content
+    else challengeTestShouldFailOnPurpose
+        T->>API: GET /api/students
+        API->>S: getAllStudents()
+        S->>R: findAll()
+        R-->>S: lista de estudantes
+        API-->>T: 200 OK (real)
+        Note over T: Teste espera 201 Created e falha propositalmente
+    end

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: html(~{::#content})}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${teacher.id != null ? 'Edit Teacher' : 'New Teacher'}">Teacher Form</title>
+</head>
+<body>
+    <div id="content">
+        <h2 th:text="${teacher.id != null ? 'Edit Teacher' : 'New Teacher'}">Teacher Form</h2>
+        
+        <form th:action="${teacher.id != null ? '/teachers/' + teacher.id : '/teachers'}" 
+              th:object="${teacher}" 
+              method="post">
+            
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" th:field="*{email}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="department" class="form-label">Department</label>
+                <input type="text" class="form-control" id="department" th:field="*{department}" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" th:text="${teacher.id != null ? 'Update' : 'Save'}">Save</button>
+            <a href="/teachers" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

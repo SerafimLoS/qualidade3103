@@ -1,0 +1,39 @@
+sequenceDiagram
+    participant T as Teste MockMvc
+    participant C as TeacherController
+    participant S as TeacherService (mock)
+    participant V as View Resolver
+
+    alt shouldListTeachers
+        T->>C: GET /teachers
+        C->>S: getAllTeachers()
+        S-->>C: lista de professores
+        C->>V: render "teacher/list"
+        V-->>T: 200 + model.teachers
+    else shouldOpenCreateForm
+        T->>C: GET /teachers/new
+        C->>V: render "teacher/form" com objeto vazio
+        V-->>T: 200 + model.teacher
+    else shouldCreateTeacherAndRedirect
+        T->>C: POST /teachers (form)
+        C->>S: saveTeacher(teacher)
+        S-->>C: ok
+        C-->>T: 302 redirect:/teachers
+    else shouldOpenEditForm
+        T->>C: GET /teachers/{id}/edit
+        C->>S: getTeacherById(id)
+        S-->>C: Optional<Teacher>
+        C->>V: render "teacher/form"
+        V-->>T: 200 + model.teacher
+    else shouldUpdateTeacherKeepingId
+        T->>C: POST /teachers/{id} (form)
+        C->>C: teacher.setId(id)
+        C->>S: saveTeacher(teacher com id original)
+        S-->>C: ok
+        C-->>T: 302 redirect:/teachers
+    else shouldDeleteTeacherAndRedirect
+        T->>C: GET /teachers/{id}/delete
+        C->>S: deleteTeacher(id)
+        S-->>C: ok
+        C-->>T: 302 redirect:/teachers
+    end

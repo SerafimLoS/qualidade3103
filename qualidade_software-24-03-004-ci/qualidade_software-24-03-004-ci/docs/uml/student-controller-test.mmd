@@ -1,0 +1,39 @@
+sequenceDiagram
+    participant T as Teste MockMvc
+    participant C as StudentController
+    participant S as StudentService (mock)
+    participant V as View Resolver
+
+    alt shouldListStudents
+        T->>C: GET /students
+        C->>S: getAllStudents()
+        S-->>C: lista de estudantes
+        C->>V: render "student/list"
+        V-->>T: 200 + model.students
+    else shouldOpenCreateForm
+        T->>C: GET /students/new
+        C->>V: render "student/form" com objeto vazio
+        V-->>T: 200 + model.student
+    else shouldCreateStudentAndRedirect
+        T->>C: POST /students (form)
+        C->>S: saveStudent(student)
+        S-->>C: ok
+        C-->>T: 302 redirect:/students
+    else shouldOpenEditForm
+        T->>C: GET /students/{id}/edit
+        C->>S: getStudentById(id)
+        S-->>C: Optional<Student>
+        C->>V: render "student/form"
+        V-->>T: 200 + model.student
+    else shouldUpdateStudentKeepingId
+        T->>C: POST /students/{id} (form)
+        C->>C: student.setId(id)
+        C->>S: saveStudent(student com id original)
+        S-->>C: ok
+        C-->>T: 302 redirect:/students
+    else shouldDeleteStudentAndRedirect
+        T->>C: GET /students/{id}/delete
+        C->>S: deleteStudent(id)
+        S-->>C: ok
+        C-->>T: 302 redirect:/students
+    end

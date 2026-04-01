@@ -1,0 +1,42 @@
+sequenceDiagram
+    participant T as Teste E2E (MockMvc)
+    participant API as TeacherApiController
+    participant S as TeacherService
+    participant R as TeacherRepository (mock)
+
+    alt shouldReturnTeachersList
+        T->>API: GET /api/teachers
+        API->>S: getAllTeachers()
+        S->>R: findAll()
+        R-->>S: lista de professores
+        API-->>T: 200 OK
+    else shouldCreateTeacher
+        T->>API: POST /api/teachers
+        API->>S: existsByEmail(email)
+        S->>R: existsByEmail(email)
+        R-->>S: false
+        API->>S: saveTeacher(teacher)
+        S->>R: save(teacher)
+        R-->>S: teacher salvo
+        API-->>T: 201 Created
+    else shouldReturnConflictWhenEmailAlreadyExists
+        T->>API: POST /api/teachers (email duplicado)
+        API->>S: existsByEmail(email)
+        S->>R: existsByEmail(email)
+        R-->>S: true
+        API-->>T: 409 Conflict
+    else shouldReturnNotFoundWhenUpdatingMissingTeacher
+        T->>API: PUT /api/teachers/missing
+        API->>S: getTeacherById("missing")
+        S->>R: findById("missing")
+        R-->>S: Optional.empty
+        API-->>T: 404 Not Found
+    else shouldDeleteTeacher
+        T->>API: DELETE /api/teachers/t1
+        API->>S: getTeacherById("t1")
+        S->>R: findById("t1")
+        R-->>S: Optional<Teacher>
+        API->>S: deleteTeacher("t1")
+        S->>R: deleteById("t1")
+        API-->>T: 204 No Content
+    end

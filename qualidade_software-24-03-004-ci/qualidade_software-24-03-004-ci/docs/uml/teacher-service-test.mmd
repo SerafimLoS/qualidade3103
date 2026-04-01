@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant T as Teste
+    participant S as TeacherService
+    participant R as TeacherRepository (mock)
+
+    alt shouldReturnAllTeachers
+        T->>S: getAllTeachers()
+        S->>R: findAll()
+        R-->>S: List<Teacher>
+        S-->>T: List<Teacher>
+    else shouldGetTeacherById
+        T->>S: getTeacherById("t1")
+        S->>R: findById("t1")
+        R-->>S: Optional<Teacher>
+        S-->>T: Optional<Teacher>
+    else shouldSaveTeacher
+        T->>S: saveTeacher(teacher)
+        S->>R: save(teacher)
+        R-->>S: Teacher salvo
+        S-->>T: Teacher salvo
+    else shouldDeleteTeacherById
+        T->>S: deleteTeacher("t2")
+        S->>R: deleteById("t2")
+        R-->>S: ok
+    else shouldCheckTeacherExistsByEmail
+        T->>S: existsByEmail("prof@escola.edu")
+        S->>R: existsByEmail("prof@escola.edu")
+        R-->>S: true
+        S-->>T: true
+    end
